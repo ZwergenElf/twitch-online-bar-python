@@ -1,2 +1,3 @@
 auth.db
 .venv
+__pycache__
