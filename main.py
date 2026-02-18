@@ -1,7 +1,7 @@
 import tkinter as tk
 import sqlite3
 
-from api_requests import get_followed_id, get_tokens, get_user_id, retrieve_tokens
+from api_requests import get_followed_id, get_users_by_id, get_tokens, get_user_by_name, retrieve_tokens
 from web_image import WebImage
 
 user_name = 'pixel_claw'
@@ -26,7 +26,7 @@ else:
 
 connection.close()
 
-response = get_user_id(user_name, access_token)
+response = get_user_by_name(user_name, access_token)
 if response.status_code == 401:
     connection = sqlite3.connect("auth.db")
     cursor = connection.cursor()
@@ -35,18 +35,22 @@ if response.status_code == 401:
     cursor.execute("UPDATE token SET access_token = ?, refresh_token user_name = ?", [user_name, token['access_token'], token['refresh_token']])
     connection.close()
     access_token = token['access_token']
-    response = get_user_id(user_name, access_token)
+    response = get_user_by_name(user_name, access_token)
 
+# receive streamer information
 user_id = response.json()['data'][0]['id']
-
 followed = get_followed_id(user_id, access_token).json()['data']
-print(followed)
+online_streamer_ids = list(map(lambda streamer: streamer['user_id'], followed))
+streamer_user_info = get_users_by_id(online_streamer_ids, access_token)
+profile_image_urls = list(map(lambda user: user['profile_image_url'],streamer_user_info))
 
-url = followed[0]["thumbnail_url"].replace("{width}", "1080").replace("{height}", "720")
 
 root = tk.Tk()
-img = WebImage(url).get()
-image_lab = tk.Label(root, image=img)
-image_lab.grid(row=0, column=0)
+for i, url in enumerate(profile_image_urls):
+    img = WebImage(url).get()
+    image_lab = tk.Label(root, image=img)
+    image_lab.image = img
+    image_lab.grid(row=i, column=0, sticky="N")
+
 
 root.mainloop()

@@ -1,6 +1,5 @@
-import sqlite3
+
 import requests
-import api_requests
 import webbrowser
 
 base_url = "https://api.twitch.tv/helix"
@@ -25,13 +24,18 @@ def get_request(endpoint, token):
     return response
     
 
-def get_user_id(name, token):
+def get_user_by_name(name, token):
     response = get_request(f"users?login={name}", token)
     return response
     
 def get_followed_id(user_id, token):
     followed = get_request(f"streams/followed?user_id={user_id}", token)
     return followed
+
+def get_users_by_id(user_ids, token):
+    user_ids_parameter = "id=" + "&id=".join(user_ids)
+    response = get_request(f"users?{user_ids_parameter}", token)
+    return response.json()['data']
 
 def post_device_auth():
     url = "https://id.twitch.tv/oauth2/device"
