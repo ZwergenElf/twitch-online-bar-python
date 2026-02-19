@@ -1,7 +1,7 @@
 import tkinter as tk
 import sqlite3
 
-from api_requests import get_followed_id, get_users_by_id, get_tokens, get_user_by_name, retrieve_tokens
+from api_requests import get_followed_id, get_users_by_id, get_tokens, get_user_by_name, refresh_tokens, retrieve_tokens
 from web_image import WebImage
 
 user_name = 'pixel_claw'
@@ -31,8 +31,8 @@ if response.status_code == 401:
     connection = sqlite3.connect("auth.db")
     cursor = connection.cursor()
     refresh_token = saved_token[2]
-    token = retrieve_tokens(scopes="user:read:follows", grant_type=refresh_token)
-    cursor.execute("UPDATE token SET access_token = ?, refresh_token user_name = ?", [user_name, token['access_token'], token['refresh_token']])
+    token = refresh_tokens(refresh_token)
+    cursor.execute("UPDATE token SET access_token = ?, refresh_token = ? WHERE user_name = ?", [token['access_token'], token['refresh_token'], user_name])
     connection.close()
     access_token = token['access_token']
     response = get_user_by_name(user_name, access_token)

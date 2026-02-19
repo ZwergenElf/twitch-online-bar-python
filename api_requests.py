@@ -4,6 +4,7 @@ import webbrowser
 
 base_url = "https://api.twitch.tv/helix"
 client_id = "d1knruskmvex6wy0cdq6bu5fy2n5ov"
+client_secret = "or9sq1dxdjc9ppu0xbwnlsi1lv88eh"
 
 def get_headers(token):
     return {
@@ -53,6 +54,20 @@ def retrieve_tokens(scopes, grant_type = 'urn:ietf:params:oauth:grant-type:devic
     'scopes': (None, scopes),
     'device_code': (None, device_code),
     'grant_type': (None, grant_type),
+    }
+
+    response = requests.post('https://id.twitch.tv/oauth2/token', files=files)
+    while response.status_code == 400:
+        response = requests.post('https://id.twitch.tv/oauth2/token', files=files)
+        
+    return response.json()
+
+def refresh_tokens(refresh_token):
+    files = {
+    'client_id': (None, client_id),
+    'client_secret': (None, client_secret),
+    'refresh_token': (None, refresh_token),
+    'grant_type': (None, "refresh_token"),
     }
 
     response = requests.post('https://id.twitch.tv/oauth2/token', files=files)

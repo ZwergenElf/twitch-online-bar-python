@@ -1,3 +1,7 @@
 auth.db
 .venv
 __pycache__
+dist
+build
+*.spec
+.DS_STORE
